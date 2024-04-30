@@ -1,26 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using PublisherDomain;
 
 namespace PublisherData;
 
 public class PubContext : DbContext
 {
+    public PubContext(DbContextOptions options) : base(options)
+    {
+    }
+
     public DbSet<Author> Authors { get; set; }
     public DbSet<Book> Books { get; set; }
     public DbSet<Artist> Artists { get; set; }
     public DbSet<Cover> Covers { get; set; }
     public DbSet<AuthorByArtist> AuthorsByArtist { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer(
-          "Data Source = (localdb)\\MSSQLLocalDB; Initial Catalog = PubDatabase"
-        ).LogTo(Console.WriteLine,
-                new[] { DbLoggerCategory.Database.Command.Name },
-                LogLevel.Information)
-        .EnableSensitiveDataLogging();
-    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AuthorByArtist>().HasNoKey()
@@ -62,10 +56,10 @@ public class PubContext : DbContext
         modelBuilder.Entity<Cover>().HasData(someCovers);
 
         modelBuilder.Entity<Author>()
-            .InsertUsingStoredProcedure("AuthorInsert", spbuilder => 
+            .InsertUsingStoredProcedure("AuthorInsert", spbuilder =>
                spbuilder.HasParameter(a => a.FirstName)
                         .HasParameter(a => a.LastName)
                         .HasResultColumn(a => a.AuthorId)
             );
-       }
+    }
 }

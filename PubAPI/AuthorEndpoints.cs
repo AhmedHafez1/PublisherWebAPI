@@ -20,7 +20,7 @@ public static class AuthorEndpoints
 
         group.MapGet("/{id}", async Task<Results<Ok<Author>, NotFound>> (int id, PubContext db) =>
         {
-            return await db.Authors.AsNoTracking()
+            return await db.Authors.Include(a => a.Books).AsNoTracking()
                 .FirstOrDefaultAsync(model => model.AuthorId == id)
                 is Author model
                     ? TypedResults.Ok(model)
